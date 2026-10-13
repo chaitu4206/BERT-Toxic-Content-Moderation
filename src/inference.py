@@ -13,7 +13,7 @@ from preprocessing import LABELS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-MODEL_PATH = PROJECT_ROOT / "models" / "bert-toxic-model-v3"
+MODEL_PATH = PROJECT_ROOT / "models" / "final"
 
 THRESHOLD_PATH = (
     PROJECT_ROOT / "models" / "evaluation-v3" / "best_thresholds.npy"
