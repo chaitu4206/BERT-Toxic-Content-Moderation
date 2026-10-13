@@ -1,12 +1,13 @@
 # BERT Toxic Content Moderation
 
-A BERT-based machine learning project for detecting toxic and harmful comments through multi-label text classification. The project includes text preprocessing, model training, evaluation artifacts, per-label threshold tuning, and inference using a saved model.
+A BERT-based machine learning project for detecting toxic and harmful comments through multi-label text classification. This project includes text preprocessing, model training, evaluation artifacts, per-label threshold tuning, and inference using a saved model.
+
+**Author:** Chaitanya
+**GitHub:** [@chaitu4206](https://github.com/chaitu4206)
 
 ## Overview
 
-Online platforms need reliable ways to identify harmful comments while reducing false positives. This project uses a fine-tuned BERT model to classify text across six toxicity categories.
-
-The classifier predicts whether a comment belongs to one or more of the following categories:
+Online platforms need reliable ways to identify harmful comments while reducing false positives. This project uses a fine-tuned BERT model to classify text across six toxicity categories:
 
 - **Toxic** — generally abusive or harmful language
 - **Severe Toxic** — highly abusive language
@@ -15,7 +16,7 @@ The classifier predicts whether a comment belongs to one or more of the followin
 - **Insult** — insulting or demeaning language
 - **Identity Hate** — hateful language targeting an identity group
 
-The task is **multi-label classification**, meaning a single comment can belong to multiple categories simultaneously.
+This is a **multi-label classification** task, meaning a single comment can belong to multiple categories simultaneously.
 
 ## Features
 
@@ -46,11 +47,11 @@ The task is **multi-label classification**, meaning a single comment can belong 
 ```text
 BERT-Toxic-Content-Moderation/
 ├── data/
-│   └── train.csv                  # Download separately
+│   └── train.csv
 ├── models/
-│   ├── final/                     # Included inference model
+│   ├── final/
 │   │   ├── config.json
-│   │   ├── model.safetensors      # Stored using Git LFS
+│   │   ├── model.safetensors
 │   │   ├── tokenizer.json
 │   │   └── tokenizer_config.json
 │   └── evaluation-v3/
@@ -69,7 +70,7 @@ BERT-Toxic-Content-Moderation/
 └── README.md
 ```
 
-**Note:** The dataset is not included in the repository. The final inference model and selected evaluation artifacts are tracked in Git, with the model weights stored through Git LFS. Other local checkpoints and training outputs may not be included.
+The dataset is not included in the repository. The final inference model and selected evaluation artifacts are tracked in Git, with model weights stored through Git LFS. Other local checkpoints and training outputs may not be included.
 
 ## Dataset
 
@@ -80,17 +81,17 @@ Dataset source: [Jigsaw Toxic Comment Classification Challenge — Kaggle](https
 ### Setup
 
 1. Open the Kaggle dataset page.
-2. Sign in to Kaggle and download the competition data.
+2. Sign in and download the competition data.
 3. Extract the archive.
 4. Place `train.csv` inside the project's `data/` directory.
 
-The expected file path is:
+Expected path:
 
 ```text
 data/train.csv
 ```
 
-The training script expects a CSV containing the comment text and six toxicity label columns:
+Required columns:
 
 ```text
 comment_text
@@ -102,14 +103,14 @@ insult
 identity_hate
 ```
 
-The preprocessing code also supports alternative text-column names such as `text` and `comment`, but the six label columns are required.
+The preprocessing code also supports alternative text-column names such as `text` and `comment`, but all six label columns are required.
 
 ## Installation
 
 ### 1. Clone the repository
 
 ```powershell
-git clone https://github.com/v78135236-dev/BERT-Toxic-Content-Moderation.git
+git clone https://github.com/chaitu4206/BERT-Toxic-Content-Moderation.git
 cd BERT-Toxic-Content-Moderation
 ```
 
@@ -117,32 +118,22 @@ cd BERT-Toxic-Content-Moderation
 
 ```powershell
 python -m venv .venv
-```
-
-Activate it in PowerShell:
-
-```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-If PowerShell blocks activation, you can run Python through the virtual environment directly or use Command Prompt to activate it.
+If PowerShell blocks activation, you can run Python through the virtual environment directly or use Command Prompt.
 
 ### 3. Install dependencies
 
 ```powershell
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-```
-
-Verify dependency consistency:
-
-```powershell
 python -m pip check
 ```
 
 ### 4. Download the dataset
 
-Follow the dataset instructions above and ensure that `data/train.csv` exists before running training.
+Follow the dataset instructions above and ensure `data/train.csv` exists before running training.
 
 ## Text Preprocessing
 
@@ -155,18 +146,14 @@ The preprocessing module performs the following operations:
 5. Normalizes repeated whitespace.
 6. Removes rows with missing text.
 7. Removes duplicate comments based on the original text column.
-8. Validates the required label columns.
+8. Validates required label columns.
 9. Removes comments that become empty after cleaning.
-
-The cleaned text is used for model training and prediction.
 
 Implementation: `src/preprocessing.py`
 
 ## Model Training
 
 The training script uses the pretrained `bert-base-uncased` model for six-label classification.
-
-The current training configuration includes:
 
 | Parameter | Value |
 |---|---:|
@@ -183,9 +170,7 @@ The current training configuration includes:
 | Weight decay | 0.01 |
 | Random seed | 42 |
 
-The script samples 20,000 records and uses multilabel-stratified splitting to create the training, validation, and test sets.
-
-Weighted binary cross-entropy loss is used to help address label imbalance. Decision thresholds are tuned using validation data.
+The script samples 20,000 records and uses multilabel-stratified splitting to create the training, validation, and test sets. Weighted binary cross-entropy loss is used to help address label imbalance, and decision thresholds are tuned using validation data.
 
 ### Run training
 
@@ -208,9 +193,9 @@ Evaluation outputs and tuned thresholds are written to:
 models/evaluation-v3/
 ```
 
-Training requires the dataset and may take considerable time depending on the hardware available. The script enables mixed-precision training when CUDA is available.
+Training requires the dataset and may take considerable time depending on the available hardware. Mixed-precision training is enabled when CUDA is available.
 
-**Important:** Retraining writes to the V3 output directory. It does not automatically replace the model in `models/final/`, which is the model used by the included inference script.
+**Important:** Retraining writes to the V3 output directory. It does not automatically replace the model in `models/final/`, which is used by the included inference script.
 
 ## Inference
 
@@ -226,9 +211,9 @@ The model is configured to load local files, so the required model and tokenizer
 
 If inference fails, check that:
 
-- The Git LFS model weights have been downloaded correctly.
-- The dependencies in `requirements.txt` are installed.
-- The model and tokenizer files exist in `models/final/`.
+- Git LFS model weights have been downloaded correctly.
+- Dependencies in `requirements.txt` are installed.
+- Model and tokenizer files exist in `models/final/`.
 - The saved threshold file exists in `models/evaluation-v3/`.
 
 The exact interaction and output format depend on the implementation in `src/inference.py`.
@@ -237,7 +222,7 @@ The exact interaction and output format depend on the implementation in `src/inf
 
 The following results were recalculated from the saved test labels and predictions in `models/evaluation-v3/results.npz`.
 
-**Evaluation summary**
+### Evaluation Summary
 
 | Metric | Score |
 |---|---:|
@@ -245,7 +230,7 @@ The following results were recalculated from the saved test labels and predictio
 | Micro F1-score | 0.6922 |
 | Macro F1-score | 0.5029 |
 
-### Per-label performance
+### Per-Label Performance
 
 | Label | Precision | Recall | F1-score |
 |---|---:|---:|---:|
@@ -258,16 +243,12 @@ The following results were recalculated from the saved test labels and predictio
 
 These metrics describe the saved predictions and labels, not a newly retrained model. The threat category's zero F1-score indicates that the saved predictions did not correctly identify any positive threat examples under the thresholds used.
 
-The difference between micro and macro F1 also highlights the challenge of imbalanced multi-label classification. Performance varies significantly between categories, so further improvements should focus on minority labels and false-positive/false-negative trade-offs.
+The difference between micro and macro F1 highlights the challenge of imbalanced multi-label classification. Performance varies significantly between categories, so improvements should focus on minority labels and false-positive/false-negative trade-offs.
 
 ## Saved Evaluation Artifacts
 
-The repository contains the following evaluation artifacts:
-
 - `models/evaluation-v3/results.npz` — saved probabilities, binary predictions, and ground-truth labels for the 2,000 test samples.
 - `models/evaluation-v3/best_thresholds.npy` — saved per-label decision thresholds.
-
-The thresholds are:
 
 | Label | Threshold |
 |---|---:|
@@ -278,7 +259,7 @@ The thresholds are:
 | Insult | 0.65 |
 | Identity Hate | 0.40 |
 
-The saved predictions and metrics should be interpreted in the context of these thresholds. Changing thresholds can change precision, recall, and F1-score without retraining the model.
+Changing thresholds can change precision, recall, and F1-score without retraining the model.
 
 ## Reproducibility Notes
 
@@ -288,7 +269,7 @@ For more consistent experiments:
 2. Download the expected dataset and place it at `data/train.csv`.
 3. Keep the configured random seed unchanged.
 4. Use the same data-sampling and splitting procedure.
-5. Record any changes to the model, thresholds, or training configuration.
+5. Record changes to the model, thresholds, or training configuration.
 6. Distinguish the included inference model from models produced by subsequent training runs.
 
 Exact numerical reproduction may still vary with hardware, library behavior, and training environment. The included evaluation artifacts preserve one set of predictions for inspection.
@@ -299,7 +280,7 @@ Exact numerical reproduction may still vary with hardware, library behavior, and
 - Minority labels may have substantially lower performance.
 - A classification score should not be treated as a definitive judgment about a person or their intent.
 - Thresholds may need adjustment for different platforms and moderation policies.
-- The model should be evaluated on representative data before being used in a real moderation workflow.
+- The model should be evaluated on representative data before real-world use.
 - Automated moderation decisions should include appropriate review and appeal mechanisms where practical.
 
 ## Future Improvements
@@ -315,6 +296,13 @@ Exact numerical reproduction may still vary with hardware, library behavior, and
 
 Review the repository's license and the dataset provider's terms before redistributing the code, model weights, or data. The dataset is distributed through the Kaggle competition page linked above; access and usage are subject to its applicable terms.
 
-## Author
+## Author & Maintainer
 
-Developed as a machine learning and natural language processing project focused on automated toxic comment classification.
+**Chaitanya** — Machine Learning and Natural Language Processing
+
+This project explores BERT-based multi-label text classification for automated toxic comment detection, including model training, threshold tuning, evaluation, and local inference.
+
+- **GitHub Profile:** [github.com/chaitu4206](https://github.com/chaitu4206)
+- **Project Repository:** [BERT Toxic Content Moderation](https://github.com/chaitu4206/BERT-Toxic-Content-Moderation)
+
+Developed as a machine learning and NLP project focused on responsible automated content moderation.
