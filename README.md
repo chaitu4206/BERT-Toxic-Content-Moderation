@@ -1,303 +1,61 @@
-# Hybrid AI Content Moderation
+# BERT Toxic Content Moderation
 
-A BERT-based multi-label toxicity classification module developed as part of a **Hybrid AI Framework for Automated Content Moderation**.
+A BERT-based machine learning project for detecting toxic and harmful comments through multi-label text classification. The project includes text preprocessing, model training, evaluation artifacts, per-label threshold tuning, and inference using a saved model.
 
-The system identifies different types of harmful content and provides probability-based predictions that can later be used by severity scoring and decision-making modules.
+## Overview
 
----
+Online platforms need reliable ways to identify harmful comments while reducing false positives. This project uses a fine-tuned BERT model to classify text across six toxicity categories.
 
-## Project Status
+The classifier predicts whether a comment belongs to one or more of the following categories:
 
-### Completed
+- **Toxic** — generally abusive or harmful language
+- **Severe Toxic** — highly abusive language
+- **Obscene** — obscene or vulgar language
+- **Threat** — threatening language
+- **Insult** — insulting or demeaning language
+- **Identity Hate** — hateful language targeting an identity group
 
-- Jigsaw Toxic Comment dataset preprocessing
-- Text cleaning and normalization
-- BERT tokenizer integration
-- Multi-label BERT classification
-- Class-weighted training
-- Multi-label stratified train/validation/test splitting
-- Validation-based threshold optimization
-- Per-class Precision, Recall, and F1 evaluation
-- Micro F1 and Macro F1 evaluation
-- Interactive inference
-- Model training and saving
-- 20K-sample experiment
+The task is **multi-label classification**, meaning a single comment can belong to multiple categories simultaneously.
 
-### Planned Next
+## Features
 
-- Random Forest severity scorer
-- Severity score generation
-- Decision engine
-- Allow / Warn / Remove recommendations
-- Human-in-the-loop moderation
-- Moderation dashboard and audit system
+- Text cleaning and preprocessing
+- BERT-based multi-label text classification
+- Training with weighted binary cross-entropy loss
+- Multilabel-stratified dataset splitting
+- Per-label decision threshold tuning
+- Saved evaluation predictions and thresholds
+- Local inference using the included model
+- Precision, recall, and F1-score evaluation
 
----
+## Technology Stack
 
-# Architecture
-
-## Current BERT Module
-
-```text
-Jigsaw Toxic Comment Dataset
-            |
-            v
-     Data Preprocessing
-            |
-            v
- Multi-label Stratified Split
-            |
-            v
-       BERT Tokenizer
-            |
-            v
-      BERT Fine-Tuning
-            |
-            v
-     Class-Weighted Loss
-            |
-            v
-  Six Toxicity Categories
-            |
-            v
- Validation Threshold Tuning
-            |
-            v
-   Final Test Evaluation
-```
-
-## Planned Complete System
-
-```text
-                    User Comment
-                         |
-                         v
-                  BERT Classifier
-                         |
-            +------------+------------+
-            |                         |
-            v                         v
-     Violation Types          Confidence Scores
-            |                         |
-            +------------+------------+
-                         |
-                         v
-                  Severity Scorer
-                  (Random Forest)
-                         |
-                         v
-                  Decision Engine
-                         |
-             +-----------+-----------+
-             |           |           |
-             v           v           v
-           ALLOW       WARN       REMOVE
-                                     |
-                                     v
-                               Human Review
-```
-
----
-
-# Dataset
-
-The project uses the **Jigsaw Toxic Comment Classification Dataset**.
-
-Original dataset size:
-
-```text
-159,563 comments
-```
-
-For the current experiment, a subset of:
-
-```text
-20,000 comments
-```
-
-was used.
-
-## Dataset Split
-
-| Dataset | Samples |
-|---|---:|
-| Training | 16,000 |
-| Validation | 2,000 |
-| Testing | 2,000 |
-| Total | 20,000 |
-
-The six toxicity labels are:
-
-- `toxic`
-- `severe_toxic`
-- `obscene`
-- `threat`
-- `insult`
-- `identity_hate`
-
-The dataset itself is not included in this repository because of its size.
-
----
-
-# Model
-
-## BERT
-
-The project uses:
-
-```text
-bert-base-uncased
-```
-
-with a multi-label classification head.
-
-A comment can belong to multiple toxicity categories simultaneously.
-
-For example:
-
-```text
-Input:
-You are an idiot and I hate you
-```
-
-may produce predictions for multiple categories such as:
-
-```text
-toxic
-obscene
-insult
-```
-
-Each category receives an independent probability.
-
----
-
-# Training Configuration
-
-| Parameter | Value |
+| Component | Technology |
 |---|---|
-| Base Model | `bert-base-uncased` |
-| Dataset | Jigsaw Toxic Comments |
-| Experiment Size | 20,000 |
-| Training Samples | 16,000 |
-| Validation Samples | 2,000 |
-| Test Samples | 2,000 |
-| Epochs | 1 |
-| Maximum Sequence Length | 64 |
-| Training Batch Size | 4 |
-| Evaluation Batch Size | 4 |
-| Gradient Accumulation | 4 |
-| Learning Rate | `2e-5` |
-| Weight Decay | `0.01` |
-| Loss | Class-weighted BCE |
-| Device | CPU |
+| Programming language | Python |
+| Deep learning framework | PyTorch |
+| NLP and transformer models | Hugging Face Transformers |
+| Dataset utilities | Hugging Face Datasets |
+| Data processing | Pandas, NumPy |
+| Evaluation | Scikit-learn |
+| Model architecture | BERT (`bert-base-uncased`) |
+| Version control | Git and Git LFS |
 
----
-
-# Class-Weighted Training
-
-The dataset is highly imbalanced, particularly for categories such as:
-
-- `threat`
-- `severe_toxic`
-- `identity_hate`
-
-To reduce the effect of class imbalance, the model uses a **weighted Binary Cross-Entropy loss**.
-
-The objective is to prevent the model from learning only the majority classes while ignoring minority categories.
-
----
-
-# Threshold Optimization
-
-Instead of assuming:
+## Repository Structure
 
 ```text
-Probability >= 0.5 → Positive
-Probability < 0.5  → Negative
-```
-
-the project determines a separate classification threshold for each label using the **validation dataset**.
-
-The optimized thresholds are then applied to the untouched test set.
-
-This prevents the test set from being used to select the thresholds.
-
----
-
-# Results
-
-## 20K Experiment
-
-Final test performance:
-
-| Metric | Score |
-|---|---:|
-| **Micro F1** | **0.6922** |
-| **Macro F1** | **0.5029** |
-
-## Per-Class Results
-
-| Category | Precision | Recall | F1 |
-|---|---:|---:|---:|
-| Toxic | 0.7877 | 0.7698 | **0.7787** |
-| Severe Toxic | 0.3265 | 0.9677 | **0.4898** |
-| Obscene | 0.6716 | 0.8879 | **0.7631** |
-| Threat | 0.0000 | 0.0000 | **0.0000** |
-| Insult | 0.5743 | 0.8614 | **0.6905** |
-| Identity Hate | 0.2372 | 0.3929 | **0.2955** |
-
-> The `threat` category remains challenging because it contains substantially fewer positive examples than the major toxicity categories.
-
----
-
-# Example Inference
-
-Run:
-
-```bash
-cd src
-python inference.py
-```
-
-Example:
-
-```text
-AI-Powered Content Moderation System
-====================================
-
-Enter comment: You are an idiot and I hate you
-```
-
-The model returns probabilities for:
-
-```text
-toxic
-severe_toxic
-obscene
-threat
-insult
-identity_hate
-```
-
-Example output format:
-
-```text
-toxic           | Probability: 0.6974 | YES
-severe_toxic    | Probability: 0.2727 | NO
-obscene         | Probability: 0.5610 | YES
-threat          | Probability: 0.2926 | NO
-insult          | Probability: 0.4755 | NO
-identity_hate   | Probability: 0.2493 | NO
-```
-
----
-
-# Project Structure
-
-```text
-Hybrid-AI-Content-Moderation/
-│
+BERT-Toxic-Content-Moderation/
+├── data/
+│   └── train.csv                  # Download separately
+├── models/
+│   ├── final/                     # Included inference model
+│   │   ├── config.json
+│   │   ├── model.safetensors      # Stored using Git LFS
+│   │   ├── tokenizer.json
+│   │   └── tokenizer_config.json
+│   └── evaluation-v3/
+│       ├── best_thresholds.npy
+│       └── results.npz
 ├── src/
 │   ├── dataset.py
 │   ├── evaluate.py
@@ -305,91 +63,36 @@ Hybrid-AI-Content-Moderation/
 │   ├── preprocessing.py
 │   ├── threshold_tuning.py
 │   └── train.py
-│
-├── data/
-│   └── train.csv              # Not included in Git
-│
-├── models/
-│   └── ...                    # Not included in Git
-│
-├── requirements.txt
+├── .gitattributes
 ├── .gitignore
+├── requirements.txt
 └── README.md
 ```
 
----
+**Note:** The dataset is not included in the repository. The final inference model and selected evaluation artifacts are tracked in Git, with the model weights stored through Git LFS. Other local checkpoints and training outputs may not be included.
 
-# Installation
+## Dataset
 
-## 1. Clone the Repository
+This project uses the **Jigsaw Toxic Comment Classification Challenge** dataset.
 
-```bash
-git clone https://github.com/chaitu4206/Hybrid-AI-Content-Moderation.git
-```
+Dataset source: [Jigsaw Toxic Comment Classification Challenge — Kaggle](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data)
 
-Move into the project:
+### Setup
 
-```bash
-cd Hybrid-AI-Content-Moderation
-```
+1. Open the Kaggle dataset page.
+2. Sign in to Kaggle and download the competition data.
+3. Extract the archive.
+4. Place `train.csv` inside the project's `data/` directory.
 
----
-
-## 2. Create a Virtual Environment
-
-### Windows
-
-```powershell
-python -m venv venv
-```
-
-Activate it:
-
-```powershell
-venv\Scripts\activate
-```
-
-### Linux / macOS
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
----
-
-## 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-Main dependencies include:
-
-- PyTorch
-- Hugging Face Transformers
-- Accelerate
-- Pandas
-- NumPy
-- Scikit-learn
-- Iterative Stratification
-
----
-
-# Dataset Setup
-
-The dataset is intentionally excluded from GitHub.
-
-Place the Jigsaw dataset at:
+The expected file path is:
 
 ```text
 data/train.csv
 ```
 
-Expected columns:
+The training script expects a CSV containing the comment text and six toxicity label columns:
 
 ```text
-id
 comment_text
 toxic
 severe_toxic
@@ -399,212 +102,219 @@ insult
 identity_hate
 ```
 
----
+The preprocessing code also supports alternative text-column names such as `text` and `comment`, but the six label columns are required.
 
-# Training
+## Installation
 
-From the project root:
+### 1. Clone the repository
 
-```bash
+```powershell
+git clone https://github.com/v78135236-dev/BERT-Toxic-Content-Moderation.git
+cd BERT-Toxic-Content-Moderation
+```
+
+### 2. Create a virtual environment
+
+```powershell
+python -m venv .venv
+```
+
+Activate it in PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+If PowerShell blocks activation, you can run Python through the virtual environment directly or use Command Prompt to activate it.
+
+### 3. Install dependencies
+
+```powershell
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+Verify dependency consistency:
+
+```powershell
+python -m pip check
+```
+
+### 4. Download the dataset
+
+Follow the dataset instructions above and ensure that `data/train.csv` exists before running training.
+
+## Text Preprocessing
+
+The preprocessing module performs the following operations:
+
+1. Converts text to lowercase.
+2. Removes URLs.
+3. Removes HTML tags.
+4. Removes `@username` mentions.
+5. Normalizes repeated whitespace.
+6. Removes rows with missing text.
+7. Removes duplicate comments based on the original text column.
+8. Validates the required label columns.
+9. Removes comments that become empty after cleaning.
+
+The cleaned text is used for model training and prediction.
+
+Implementation: `src/preprocessing.py`
+
+## Model Training
+
+The training script uses the pretrained `bert-base-uncased` model for six-label classification.
+
+The current training configuration includes:
+
+| Parameter | Value |
+|---|---:|
+| Pretrained model | `bert-base-uncased` |
+| Maximum sequence length | 64 tokens |
+| Dataset sample | 20,000 comments |
+| Training set | 16,000 comments |
+| Validation set | 2,000 comments |
+| Test set | 2,000 comments |
+| Training epochs | 1 |
+| Training batch size | 4 |
+| Gradient accumulation steps | 4 |
+| Learning rate | 0.00002 |
+| Weight decay | 0.01 |
+| Random seed | 42 |
+
+The script samples 20,000 records and uses multilabel-stratified splitting to create the training, validation, and test sets.
+
+Weighted binary cross-entropy loss is used to help address label imbalance. Decision thresholds are tuned using validation data.
+
+### Run training
+
+From the repository root:
+
+```powershell
 cd src
 python train.py
 ```
 
-The training script performs:
+The script is configured to write its V3 training model to:
 
-1. Dataset loading
-2. Text preprocessing
-3. Multi-label stratified splitting
-4. Tokenization
-5. Class-weight calculation
-6. BERT fine-tuning
-7. Validation evaluation
-8. Threshold optimization
-9. Test evaluation
-10. Model saving
-
----
-
-# Evaluation
-
-To evaluate a saved BERT model:
-
-```bash
-cd src
-python evaluate.py
+```text
+models/bert-toxic-model-v3/
 ```
 
----
+Evaluation outputs and tuned thresholds are written to:
 
-# Inference
+```text
+models/evaluation-v3/
+```
 
-To test the trained model interactively:
+Training requires the dataset and may take considerable time depending on the hardware available. The script enables mixed-precision training when CUDA is available.
 
-```bash
-cd src
+**Important:** Retraining writes to the V3 output directory. It does not automatically replace the model in `models/final/`, which is the model used by the included inference script.
+
+## Inference
+
+The inference script loads the model from `models/final/` and uses the saved per-label thresholds in `models/evaluation-v3/best_thresholds.npy`.
+
+Run it from the `src` directory:
+
+```powershell
 python inference.py
 ```
 
-Enter a comment when prompted.
+The model is configured to load local files, so the required model and tokenizer files must be present in `models/final/`.
 
-The model returns:
+If inference fails, check that:
 
-- Probability for each toxicity category
-- Binary toxicity prediction
+- The Git LFS model weights have been downloaded correctly.
+- The dependencies in `requirements.txt` are installed.
+- The model and tokenizer files exist in `models/final/`.
+- The saved threshold file exists in `models/evaluation-v3/`.
 
----
+The exact interaction and output format depend on the implementation in `src/inference.py`.
 
-# Threshold Tuning
+## Evaluation Results
 
-The project also contains:
+The following results were recalculated from the saved test labels and predictions in `models/evaluation-v3/results.npz`.
 
-```text
-src/threshold_tuning.py
-```
+**Evaluation summary**
 
-This script can be used for experimental threshold analysis.
+| Metric | Score |
+|---|---:|
+| Test samples | 2,000 |
+| Micro F1-score | 0.6922 |
+| Macro F1-score | 0.5029 |
 
-For the final evaluation pipeline, thresholds should be selected using validation data and then applied to the untouched test set.
+### Per-label performance
 
----
+| Label | Precision | Recall | F1-score |
+|---|---:|---:|---:|
+| Toxic | 0.7892 | 0.7684 | 0.7787 |
+| Severe Toxic | 0.4138 | 0.6000 | 0.4898 |
+| Obscene | 0.6690 | 0.8879 | 0.7631 |
+| Threat | 0.0000 | 0.0000 | 0.0000 |
+| Insult | 0.5762 | 0.8614 | 0.6905 |
+| Identity Hate | 0.1884 | 0.6842 | 0.2955 |
 
-# Technologies Used
+These metrics describe the saved predictions and labels, not a newly retrained model. The threat category's zero F1-score indicates that the saved predictions did not correctly identify any positive threat examples under the thresholds used.
 
-- **Python**
-- **PyTorch**
-- **Hugging Face Transformers**
-- **BERT**
-- **Scikit-learn**
-- **Pandas**
-- **NumPy**
-- **Iterative Stratification**
+The difference between micro and macro F1 also highlights the challenge of imbalanced multi-label classification. Performance varies significantly between categories, so further improvements should focus on minority labels and false-positive/false-negative trade-offs.
 
----
+## Saved Evaluation Artifacts
 
-# Limitations
+The repository contains the following evaluation artifacts:
 
-The current model has several limitations:
+- `models/evaluation-v3/results.npz` — saved probabilities, binary predictions, and ground-truth labels for the 2,000 test samples.
+- `models/evaluation-v3/best_thresholds.npy` — saved per-label decision thresholds.
 
-1. Training was performed on CPU.
-2. Only 20,000 of the original 159,563 comments were used for the current experiment.
-3. The dataset is highly imbalanced.
-4. The `threat` category remains difficult to classify.
-5. The current system is focused on toxicity classification and does not yet implement the complete severity/decision pipeline.
-6. The trained model files are not stored in this GitHub repository.
+The thresholds are:
 
----
+| Label | Threshold |
+|---|---:|
+| Toxic | 0.75 |
+| Severe Toxic | 0.80 |
+| Obscene | 0.70 |
+| Threat | 0.55 |
+| Insult | 0.65 |
+| Identity Hate | 0.40 |
 
-# Future Work
+The saved predictions and metrics should be interpreted in the context of these thresholds. Changing thresholds can change precision, recall, and F1-score without retraining the model.
 
-The next stage of the project will extend the BERT classifier into a complete hybrid moderation framework.
+## Reproducibility Notes
 
-## 1. Severity Scoring
+For more consistent experiments:
 
-Develop a Random Forest model that combines:
+1. Use the dependency versions specified in `requirements.txt`.
+2. Download the expected dataset and place it at `data/train.csv`.
+3. Keep the configured random seed unchanged.
+4. Use the same data-sampling and splitting procedure.
+5. Record any changes to the model, thresholds, or training configuration.
+6. Distinguish the included inference model from models produced by subsequent training runs.
 
-- BERT violation categories
-- BERT confidence scores
-- Number of detected violations
-- Severity-related features
-- Report patterns
+Exact numerical reproduction may still vary with hardware, library behavior, and training environment. The included evaluation artifacts preserve one set of predictions for inspection.
 
-to generate a severity score.
+## Limitations
 
-## 2. Decision Engine
+- Toxicity labels can be subjective and context-dependent.
+- Minority labels may have substantially lower performance.
+- A classification score should not be treated as a definitive judgment about a person or their intent.
+- Thresholds may need adjustment for different platforms and moderation policies.
+- The model should be evaluated on representative data before being used in a real moderation workflow.
+- Automated moderation decisions should include appropriate review and appeal mechanisms where practical.
 
-The decision engine will combine:
+## Future Improvements
 
-- BERT predictions
-- Severity score
-- Confidence
-- Rule-based conditions
+- Improve recall and precision for underrepresented toxicity categories.
+- Compare alternative threshold-tuning strategies.
+- Evaluate performance on unseen and out-of-domain comments.
+- Add confusion matrices and per-label precision-recall curves.
+- Compare model versions using a consistent held-out test set.
+- Explore human review for uncertain or high-impact moderation decisions.
 
-to recommend:
+## License and Dataset Attribution
 
-```text
-ALLOW
-WARN
-REMOVE
-ESCALATE TO HUMAN REVIEW
-```
+Review the repository's license and the dataset provider's terms before redistributing the code, model weights, or data. The dataset is distributed through the Kaggle competition page linked above; access and usage are subject to its applicable terms.
 
-## 3. Human-in-the-Loop
+## Author
 
-Low-confidence or high-risk content can be forwarded to a human moderator for review.
-
-## 4. Moderation Dashboard
-
-A future dashboard can provide:
-
-- Reported comments
-- Toxicity categories
-- Confidence scores
-- Severity levels
-- Recommended actions
-- Moderator decisions
-- Audit history
-
----
-
-# Project Pipeline
-
-```text
-User-Reported Content
-        |
-        v
-Data Preprocessing
-        |
-        v
-BERT Toxicity Classification
-        |
-        v
-Violation Categories + Confidence
-        |
-        v
-Random Forest Severity Scoring
-        |
-        v
-Decision Engine
-        |
-        +------------+------------+-------------+
-        |            |            |             |
-        v            v            v             v
-      ALLOW        WARN        REMOVE     HUMAN REVIEW
-```
-
----
-
-# Current Development Status
-
-```text
-[✓] Dataset preprocessing
-[✓] BERT model implementation
-[✓] Multi-label classification
-[✓] Class-weighted training
-[✓] Stratified data splitting
-[✓] Threshold optimization
-[✓] Model evaluation
-[✓] Inference
-[✓] 20K experiment
-[✓] GitHub repository
-
-[ ] Random Forest severity scorer
-[ ] Decision engine
-[ ] Human-in-the-loop module
-[ ] Moderation dashboard
-[ ] Audit system
-```
-
----
-
-# Author
-
-**Chaitanya Swarup Reddy Pathakota**
-
-GitHub: https://github.com/chaitu4206
-
----
-
-## License
-
-This project is developed for academic and research purposes.
+Developed as a machine learning and natural language processing project focused on automated toxic comment classification.
